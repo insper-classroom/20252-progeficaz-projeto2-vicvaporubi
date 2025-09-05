@@ -1,0 +1,23 @@
+[
+    {
+        "nome": "BelasArtes",
+        "tipo": "Faculdade",
+        "cidade": "S\u00e3oPaulo",
+        "preco": 12032334.0,
+        "id": 1
+    },
+    {
+        "nome": "Insper",
+        "tipo": "Faculdade",
+        "cidade": "S\u00e3oPaulo",
+        "preco": 1231234125357.0,
+        "id": 2
+    },
+    {
+        "nome": "MOedse",
+        "tipo": "Lojinhs",
+        "cidade": "Minas",
+        "preco": 123.0,
+        "id": 3
+    }
+]
