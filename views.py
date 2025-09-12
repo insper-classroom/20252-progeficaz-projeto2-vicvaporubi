@@ -1,55 +1,69 @@
-from utils import get_data, save_data
-
+from utils import get_data, get_imovel_by_id, save_data, get_connection
 
 def get_imoveis():
-    data = get_data()
-    return data
-
+    return get_data()
 
 def get_imovel(id):
-    data = get_data()
-    for imovel in data:
-        if imovel["id"] == id:
-            return imovel
+    imovel = get_imovel_by_id(id)
+    if imovel:
+        return imovel
     return {"error": "Imóvel não encontrado"}, 404
-
 
 def create_imovel(imovel):
-    data = get_data()
-    new_id = max([item["id"] for item in data], default=0) + 1
-    imovel["id"] = new_id
-    data.append(imovel)
-    save_data(data)
+    save_data(imovel)
     return "Imóvel criado com sucesso", 201
 
-
 def update_imovel(imovel):
-    data = get_data()
-    for index, item in enumerate(data):
-        if item["id"] == imovel["id"]:
-            data[index] = imovel
-            save_data(data)
-            return "Imóvel atualizado com sucesso", 200
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE imoveis SET logradouro=?, tipo_logradouro=?, bairro=?, cidade=?, cep=?, tipo=?, valor=?, data_aquisicao=? WHERE id=?;",
+        (
+            imovel["logradouro"],
+            imovel["tipo_logradouro"],
+            imovel["bairro"],
+            imovel["cidade"],
+            imovel["cep"],
+            imovel["tipo"],
+            imovel["valor"],
+            imovel["data_aquisicao"],
+            imovel["id"]
+        )
+    )
+    conn.commit()
+    updated = cursor.rowcount
+    cursor.close()
+    conn.close()
+    if updated:
+        return "Imóvel atualizado com sucesso", 200
     return {"error": "Imóvel não encontrado"}, 404
-
 
 def delete_imovel(id):
-    data = get_data()
-    for index, item in enumerate(data):
-        if item["id"] == id:
-            del data[index]
-            save_data(data)
-            return "Imóvel deletado com sucesso", 200
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM imoveis WHERE id=?;", id)
+    conn.commit()
+    deleted = cursor.rowcount
+    cursor.close()
+    conn.close()
+    if deleted:
+        return "Imóvel deletado com sucesso", 200
     return {"error": "Imóvel não encontrado"}, 404
 
-
 def get_imoveis_by_tipo(tipo):
-    data = get_data()
-    filtered_imoveis = [imovel for imovel in data if imovel["tipo"] == tipo]
-    return filtered_imoveis
-
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT (*) FROM imoveis WHERE tipo=?;", tipo)
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return data
 
 def get_imoveis_by_cidade(cidade):
-    data = get_data()
-    filtered_imoveis = [imovel for imovel in data if imovel["cidade"] == cidade]
-    return filtered_imoveis
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT (*) FROM imoveis WHERE cidade=?;", cidade)
+    data = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return data

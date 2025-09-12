@@ -127,7 +127,7 @@ def test_update_imovel(mock_get_connection, client):
     novo_imovel['data_aquisicao'],
     novo_imovel["id"]
     )
-    expected_sql = "UPDATE imoveis SET logradouro=?,  tipo_logradouro=?, bairro=?, cidade=?, cep=?, tipo=?, valor=?, data_aquisicao=? WHERE id=?;".strip()
+    expected_sql = "UPDATE imoveis SET logradouro=?, tipo_logradouro=?, bairro=?, cidade=?, cep=?, tipo=?, valor=?, data_aquisicao=? WHERE id=?;".strip()
     mock_cursor.execute.assert_called_once_with(expected_sql, data)
 
 
