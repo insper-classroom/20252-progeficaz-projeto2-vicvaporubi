@@ -1,13 +1,19 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 
 import views
 
 app = Flask(__name__)
 
 
+@app.route("/")
+def home():
+    return "<h1>API de Imóveis</h1><p>Bem-vindo à API de Imóveis!</p><h4>Commandos:</h4><p>/imoveis - GET: Lista todos os imóveis<br>/imoveis/&lt;id&gt; - GET: Detalha um imóvel pelo ID<br>/imoveis/tipo/&lt;tipo&gt; - GET: Filtra imóveis por tipo<br>/imoveis/cidade/&lt;cidade&gt; - GET: Filtra imóveis por cidade<br>/imoveis - POST: Cria um novo imóvel<br>/imoveis - PUT: Atualiza um imóvel existente<br>/imoveis/&lt;id&gt; - DELETE: Remove um imóvel pelo ID</p>"
+
+
 @app.get("/imoveis")
 def get_imoveis():
     return jsonify(views.get_imoveis()), 200
+
 
 @app.get("/imoveis/<int:id>")
 def get_imovel(id):
@@ -33,12 +39,21 @@ def create_imovel():
     if not request_data:
         return jsonify({"error": "Dados inválidos"}), 400
     required_fields = [
-        "logradouro", "tipo_logradouro", "bairro", "cidade", "cep",
-        "tipo", "valor", "data_aquisicao"
+        "logradouro",
+        "tipo_logradouro",
+        "bairro",
+        "cidade",
+        "cep",
+        "tipo",
+        "valor",
+        "data_aquisicao",
     ]
-    if not all(field in request_data and request_data[field] for field in required_fields):
+    if not all(
+        field in request_data and request_data[field] for field in required_fields
+    ):
         return jsonify({"error": "Todos os campos são obrigatórios"}), 400
     return jsonify(views.create_imovel(request_data)), 201
+
 
 @app.put("/imoveis")
 def update_imovel():
@@ -46,10 +61,19 @@ def update_imovel():
     if not request_data:
         return jsonify({"error": "Dados inválidos"}), 400
     required_fields = [
-        "id", "logradouro", "tipo_logradouro", "bairro", "cidade", "cep",
-        "tipo", "valor", "data_aquisicao"
+        "id",
+        "logradouro",
+        "tipo_logradouro",
+        "bairro",
+        "cidade",
+        "cep",
+        "tipo",
+        "valor",
+        "data_aquisicao",
     ]
-    if not all(field in request_data and request_data[field] for field in required_fields):
+    if not all(
+        field in request_data and request_data[field] for field in required_fields
+    ):
         return jsonify({"error": "Todos os campos são obrigatórios"}), 400
     msg, status = views.update_imovel(request_data)
     return jsonify({"message": msg}), status
@@ -63,4 +87,4 @@ def delete_imovel(id):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
+    app.run(host="0.0.0.0", port=5000, debug=True)
