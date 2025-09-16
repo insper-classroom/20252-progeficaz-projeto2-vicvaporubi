@@ -1,3 +1,9 @@
+from hateoas import (
+    add_links_to_collection,
+    add_links_to_imovel,
+    create_error_response,
+    create_success_response,
+)
 from utils import get_connection
 
 
@@ -9,9 +15,9 @@ def get_all_imoveis():
     cursor.close()
     conn.close()
     if data:
-        return data, 200
+        return add_links_to_collection(data), 200
     else:
-        return {"error": "Nenhum imóvel encontrado"}, 404
+        return create_error_response("Nenhum imóvel encontrado"), 404
 
 
 def get_imovel(id):
@@ -22,8 +28,8 @@ def get_imovel(id):
     cursor.close()
     conn.close()
     if imovel:
-        return imovel, 200
-    return {"error": f"Imóvel com id {id} não encontrado"}, 404
+        return add_links_to_imovel(dict(imovel)), 200
+    return create_error_response(f"Imóvel com id {id} não encontrado"), 404
 
 
 def create_imovel(imovel):
@@ -58,12 +64,12 @@ def create_imovel(imovel):
         ),
     )
     conn.commit()
-    con = cursor.lastrowid
+    new_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    if not con:
-        return {"error": "Erro ao criar o imóvel"}, 500
-    return {"message": "Imóvel criado com sucesso"}, 201
+    if not new_id:
+        return create_error_response("Erro ao criar o imóvel"), 500
+    return create_success_response("Imóvel criado com sucesso", new_id), 201
 
 
 def update_imovel(imovel, id):
@@ -136,7 +142,7 @@ def get_imoveis_by_tipo(tipo):
         return {
             "error": f"Nenhum imóvel encontrado com o tipo {tipo} especificado"
         }, 404
-    return data, 200
+    return add_links_to_collection(data), 200
 
 
 def get_imoveis_by_cidade(cidade):
@@ -151,4 +157,4 @@ def get_imoveis_by_cidade(cidade):
         return {
             "error": f"Nenhum imóvel encontrado para a cidade {cidade} especificada"
         }, 404
-    return data, 200
+    return add_links_to_collection(data), 200

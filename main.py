@@ -1,7 +1,7 @@
 import sys
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for
 
 import views
 from utils import initialize_database
@@ -13,7 +13,24 @@ load_dotenv()
 
 @app.route("/")
 def home():
-    return "<h1>API de Imóveis</h1><p>Bem-vindo à API de Imóveis!</p><h4>Commandos:</h4><p>/imoveis - GET: Lista todos os imóveis<br>/imoveis/&lt;id&gt; - GET: Detalha um imóvel pelo ID<br>/imoveis/tipo/&lt;tipo&gt; - GET: Filtra imóveis por tipo<br>/imoveis/cidade/&lt;cidade&gt; - GET: Filtra imóveis por cidade<br>/imoveis - POST: Cria um novo imóvel<br>/imoveis - PUT: Atualiza um imóvel existente<br>/imoveis/&lt;id&gt; - DELETE: Remove um imóvel pelo ID</p>"
+    return "<h1>API de Imóveis</h1><p>Bem-vindo à API de Imóveis!</p><p><a href='/api'>API Root</a> - Discover endpoints</p>"
+
+
+@app.route("/api")
+def api_root():
+    """Simple API root for discovery"""
+    return jsonify(
+        {
+            "title": "API de Imóveis - HATEOAS",
+            "description": "Richardson Maturity Model Level 3",
+            "_links": {
+                "self": request.url,
+                "imoveis": url_for("get_all_imoveis", _external=True),
+                "create_imovel": url_for("create_imovel", _external=True),
+                "home": url_for("home", _external=True),
+            },
+        }
+    )
 
 
 @app.get("/imoveis")
