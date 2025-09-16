@@ -18,12 +18,12 @@ def get_imovel(id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM imoveis WHERE id=%s;", (id,))
-    data = cursor.fetchone()
+    imovel = cursor.fetchone()
     cursor.close()
     conn.close()
-    if data:
-        return data
-    return {"error": f"Imóvel com id: {id} não encontrado"}, 404
+    if imovel:
+        return imovel, 200
+    return {"error": f"Imóvel com id {id} não encontrado"}, 404
 
 
 def create_imovel(imovel):

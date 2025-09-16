@@ -125,6 +125,37 @@ class TestImoveisAPI:
         assert resp.get_json() == {"error": "Nenhum imóvel encontrado"}
 
     # Test get imovel by id
+    def test_get_imovel_by_id_(self, client):
+        # Simulate imove get
+        imovel = self.mock_imovel.copy()
+        self.mock_cursor.fetchone.return_value = imovel
+
+        resp = client.get(f"/imoveis/{imovel['id']}")
+        assert resp.status_code == 200
+        expected_sql = "SELECT * FROM imoveis WHERE id=%s;".strip()
+        self.mock_cursor.execute.assert_called_once_with(expected_sql, (imovel["id"],))
+
+    def test_get_imovel_by_id_not_found(self, client):
+        # Simulate imovel not found in database
+        self.mock_cursor.fetchone.return_value = {}
+
+        non_existent_id = 999  # Non-existent ID
+        resp = client.get(f"/imoveis/{non_existent_id}")
+        assert resp.status_code == 404
+        assert resp.get_json() == {
+            "error": f"Imóvel com id {non_existent_id} não encontrado"
+        }
+
+    @pytest.mark.parametrize("invalid_id", [-1, 3.5, "abc"])
+    def test_get_imovel_by_id_invalid_id(self, invalid_id, client):
+        # Set the connection to off
+        self.conn = "off"
+
+        # Try to get imovel with invalid id (non-integer)
+        resp = client.get(f"/imoveis/{invalid_id}")
+        assert resp.status_code in [404, 415]
+
+    # Test create imovel
     def test_create_imovel(self, client):
         novo_imovel = self.mock_imovel.copy()
 
@@ -335,6 +366,10 @@ if __name__ == "__main__":
                 if argv[2] == "get-all-imoveis":
                     # Run all test starting with 'get_all_imoveis'
                     pytest.main(["-v", __file__, "-k", "get_all_imoveis"])
+
+                elif argv[2] == "get-imovel":
+                    # Run all test starting with 'get_imovel'
+                    pytest.main(["-v", __file__, "-k", "get_imovel_by_id"])
                 elif argv[2] == "create-imovel":
                     # Run all test starting with 'create_imovel'
                     pytest.main(["-v", __file__, "-k", "create_imovel"])
