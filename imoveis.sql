@@ -10,6 +10,13 @@ CREATE TABLE IF NOT EXISTS imoveis (
     data_aquisicao TEXT
 );
 
+-- Clear existing data
+DELETE FROM imoveis;
+
+-- Alter table to reset auto-increment (SQLite specific)
+ALTER TABLE imoveis AUTO_INCREMENT = 1;
+
+
 -- ALGUMAS OBSERVAÇÕES SOBRE A CRIAÇÃO
 -- 'id': O SQLite usa 'INTEGER PRIMARY KEY AUTOINCREMENT' para definir uma coluna como chave primária com autoincremento.
 -- 'VARCHAR' e 'CHAR': O SQLite não diferencia muito entre os tipos 'VARCHAR', 'CHAR', e 'TEXT'. Todos eles são armazenados como 'TEXT'. Portanto, todos os campos de texto foram alterados para 'TEXT'.

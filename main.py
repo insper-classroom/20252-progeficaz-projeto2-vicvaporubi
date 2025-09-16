@@ -1,8 +1,14 @@
+import sys
+
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 
 import views
+from utils import initialize_database
 
 app = Flask(__name__)
+# Loading environment variables from .env file if present
+load_dotenv()
 
 
 @app.route("/")
@@ -11,80 +17,67 @@ def home():
 
 
 @app.get("/imoveis")
-def get_imoveis():
-    return jsonify(views.get_imoveis()), 200
+def get_all_imoveis():
+    json, status = views.get_all_imoveis()
+    return jsonify(json), status
 
 
 @app.get("/imoveis/<int:id>")
 def get_imovel(id):
-    result = views.get_imovel(id)
-    if isinstance(result, tuple):
-        return jsonify(result[0]), result[1]
-    return jsonify(result), 200
+    json, status = views.get_imovel(id)
+    return jsonify(json), status
 
 
 @app.get("/imoveis/tipo/<string:tipo>")
 def get_imoveis_by_tipo(tipo):
-    return jsonify(views.get_imoveis_by_tipo(tipo)), 200
+    json, status = views.get_imoveis_by_tipo(tipo)
+    return jsonify(json), status
 
 
 @app.get("/imoveis/cidade/<string:cidade>")
 def get_imoveis_by_cidade(cidade):
-    return jsonify(views.get_imoveis_by_cidade(cidade)), 200
+    json, status = views.get_imoveis_by_cidade(cidade)
+    return jsonify(json), status
 
 
 @app.post("/imoveis")
 def create_imovel():
-    request_data = request.get_json()
-    if not request_data:
-        return jsonify({"error": "Dados inválidos"}), 400
-    required_fields = [
-        "logradouro",
-        "tipo_logradouro",
-        "bairro",
-        "cidade",
-        "cep",
-        "tipo",
-        "valor",
-        "data_aquisicao",
-    ]
-    if not all(
-        field in request_data and request_data[field] for field in required_fields
-    ):
-        return jsonify({"error": "Todos os campos são obrigatórios"}), 400
-    return jsonify(views.create_imovel(request_data)), 201
+    json, status = views.create_imovel(request.get_json())
+    return jsonify(json), status
 
 
-@app.put("/imoveis")
-def update_imovel():
-    request_data = request.get_json()
-    if not request_data:
-        return jsonify({"error": "Dados inválidos"}), 400
-    required_fields = [
-        "id",
-        "logradouro",
-        "tipo_logradouro",
-        "bairro",
-        "cidade",
-        "cep",
-        "tipo",
-        "valor",
-        "data_aquisicao",
-    ]
-    if not all(
-        field in request_data and request_data[field] for field in required_fields
-    ):
-        return jsonify({"error": "Todos os campos são obrigatórios"}), 400
-    msg, status = views.update_imovel(request_data)
-    return jsonify({"message": msg}), status
+@app.put("/imoveis/<int:id>")
+def update_imovel(id):
+    json, status = views.update_imovel(request.get_json(), id)
+    return jsonify(json), status
 
 
 @app.delete("/imoveis/<int:id>")
 def delete_imovel(id):
-    msg, status = views.delete_imovel(id)
-    return jsonify({"message": msg}), status
+    json, status = views.delete_imovel(id)
+    return jsonify(json), status
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Loading environment variables from .env file if present
+    load_dotenv()
+    # Command line arguments handling
+    command = ""
+    if len(sys.argv) > 1:
+        command = sys.argv[1]
+    elif len(sys.argv) == 1:
+        command = "dev"
+    elif len(sys.argv) > 2:
+        print("Uso: python main.py [init_db|dev]")
+        sys.exit(1)
+
+    if command == "init_db":
+        initialize_database()
+        sys.exit(0)
+
+    # Run the app
+    elif command == "dev":
+        app.run(debug=True)
+        app.run(host="0.0.0.0", port=5000, debug=True)
+    else:
+        print("Uso: python main.py [init_db|dev]")
